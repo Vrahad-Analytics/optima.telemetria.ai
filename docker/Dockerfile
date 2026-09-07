@@ -4,7 +4,7 @@
 #   SPARK_VERSION - Spark version to use (default: 3.5.1)
 #   SCALA_VERSION - Scala binary version: 2.12 or 2.13 (default: 2.12)
 #   OPTIMA_VERSION - Optima plugin version (default: 0.1.0)
-#   USE_LOCAL_JAR - Use locally built JAR instead of Maven (default: true until io.telemetria artifacts are published)
+#   USE_LOCAL_JAR - Use locally built JAR instead of Maven (default: true until ai.telemetria artifacts are published)
 #
 # Runtime:
 #   Mount your event log directory to /spark-history
@@ -71,7 +71,7 @@ RUN SPARK_MAJOR=$(echo ${SPARK_VERSION} | cut -d. -f1) && \
             exit 1; \
         fi; \
     else \
-        echo "Downloading from Maven: io.telemetria:${ARTIFACT_NAME}_${SCALA_VER}:${OPTIMA_VERSION}" && \
+        echo "Downloading from Maven: ai.telemetria:${ARTIFACT_NAME}_${SCALA_VER}:${OPTIMA_VERSION}" && \
         curl -fSL -o /opt/spark/jars/optima-plugin.jar \
             "https://repo1.maven.org/maven2/io/telemetria/${ARTIFACT_NAME}_${SCALA_VER}/${OPTIMA_VERSION}/${ARTIFACT_NAME}_${SCALA_VER}-${OPTIMA_VERSION}.jar"; \
     fi && \

@@ -6,7 +6,7 @@
 echo "🧹 Cleaning local ivy cache and build artifacts..."
 
 # Remove all local optima artifacts
-rm -rf ~/.ivy2/local/io.telemetria/
+rm -rf ~/.ivy2/local/ai.telemetria/
 
 # Clean all target directories
 find . -name "target" -type d -exec rm -rf {} + 2>/dev/null || true

@@ -1,31 +1,27 @@
-
-import xerial.sbt.Sonatype._
-
-ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
-
-ThisBuild / sonatypeTimeoutMillis := 600000 // 10 minutes
-
-sonatypeProfileName := "io.telemetria"
-
-ThisBuild / sonatypeProfileName := "io.telemetria"
+// POM metadata required by Maven Central (Sonatype Central Portal).
+// The publishing mechanism itself is sbt's built-in Central Portal support
+// (see `publishTo` in build.sbt); no sbt-sonatype plugin settings are needed.
 
 ThisBuild / publishMavenStyle := true
 
-ThisBuild / licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+// Declares how version numbers should be compared for binary-compatibility checks.
+ThisBuild / versionScheme := Some("early-semver")
 
-ThisBuild / sonatypeProjectHosting := Some(GitHubHosting("Vrahad-Analytics", "optima", "ardb40@gmail.com"))
+ThisBuild / licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 ThisBuild / description := "Optima by Telemetria - open source performance monitoring for Apache Spark"
 
-ThisBuild / homepage := Some(url("https://github.com/Vrahad-Analytics/optima"))
+ThisBuild / homepage := Some(url("https://github.com/Vrahad-Analytics/optima.telemetria.ai"))
+
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/Vrahad-Analytics/optima"),
-    "scm:git@github.com:Vrahad-Analytics/optima.git"
+    url("https://github.com/Vrahad-Analytics/optima.telemetria.ai"),
+    "scm:git@github.com:Vrahad-Analytics/optima.telemetria.ai.git"
   )
 )
+
 ThisBuild / developers := List(
-    Developer(
+  Developer(
     id = "vrahad-analytics",
     name = "Vrahad Analytics",
     email = "ardb40@gmail.com",

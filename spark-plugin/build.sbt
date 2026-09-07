@@ -1,10 +1,34 @@
-import xerial.sbt.Sonatype._
 import sbtassembly.AssemblyPlugin.autoImport._
 
+// Base version for SNAPSHOT builds only; releases take their version from the git tag.
 lazy val versionNum: String = "0.1.0"
 lazy val scala212 = "2.12.20"
 lazy val scala213 = "2.13.16"
 lazy val supportedScalaVersions = List(scala212, scala213)
+
+// Version and publish target are build-wide. publishTo MUST be at ThisBuild scope:
+// `localStaging` resolves per-scope, and the Central Portal expects every module of
+// the release staged into ONE bundle directory. Scoping it per-project would scatter
+// artifacts across <module>/target/sona-staging and sonaUpload would miss them.
+ThisBuild / version := {
+  // A v-prefixed git tag on HEAD drives the released version: v0.2.0 publishes 0.2.0.
+  // Untagged commits publish `versionNum` as a snapshot. This means the tag is the
+  // single source of truth for a release - bumping versionNum alone does nothing,
+  // and tagging does not silently republish a stale hardcoded number.
+  git.gitCurrentTags.value.filter(_.startsWith("v")).sorted.lastOption match {
+    case Some(tag) => tag.stripPrefix("v")
+    case None      => versionNum + "-SNAPSHOT"
+  }
+}
+
+ThisBuild / publishTo := {
+  // Deliberately not isSnapshot.value: sbt-dynver (pulled in by sbt-ci-release) sets
+  // that independently of the version defined above, which can desync the two.
+  if ((ThisBuild / version).value.endsWith("-SNAPSHOT"))
+    Some("central-snapshots" at "https://central.sonatype.com/repository/maven-snapshots/")
+  else
+    localStaging.value
+}
 
 lazy val optima = project
   .in(file("."))
@@ -28,38 +52,23 @@ lazy val optima = project
 lazy val plugin = (project in file("plugin"))
   .settings(
     name := "optima-spark-common",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
+    scalaVersion := scala212,
     crossScalaVersions := supportedScalaVersions,
-    version      := (if (git.gitCurrentTags.value.exists(_.startsWith("v"))) {
-      versionNum
-    } else {
-      versionNum + "-SNAPSHOT"
-    }),
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.5.1" % "provided",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.5.1"  % "provided",
     libraryDependencies += "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.5.0" % "provided",
     libraryDependencies += "io.delta" %% "delta-spark" % "3.2.0" % "provided",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-    // Sonatype Central Portal repository configuration
-    publishTo := {
-      if (isSnapshot.value)
-        Some("snapshots" at "https://central.sonatype.com/repository/maven-snapshots/")
-      else
-        sonatypePublishToBundle.value
-    }
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % Test
   )
 
 lazy val pluginspark3 = (project in file("pluginspark3"))
   .enablePlugins(AssemblyPlugin)
   .settings(
     name := "optima-spark",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
+    scalaVersion := scala212,
     crossScalaVersions := supportedScalaVersions,
-    version      := (if (git.gitCurrentTags.value.exists(_.startsWith("v"))) {
-      versionNum
-    } else {
-      versionNum + "-SNAPSHOT"
-    }),
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.5.1" % "provided",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.5.1"  % "provided",
     libraryDependencies += "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.5.0" % "provided",
@@ -79,13 +88,6 @@ lazy val pluginspark3 = (project in file("pluginspark3"))
     
     // Publish the assembled JAR instead of the regular JAR
     Compile / packageBin := assembly.value,
-    // Sonatype Central Portal repository configuration
-    publishTo := {
-      if (isSnapshot.value)
-        Some("snapshots" at "https://central.sonatype.com/repository/maven-snapshots/")
-      else
-        sonatypePublishToBundle.value
-    },
     
     // Include source from plugin directory for self-contained build
     Compile / unmanagedSourceDirectories += (plugin / Compile / sourceDirectory).value / "scala",
@@ -122,14 +124,9 @@ lazy val pluginspark4 = (project in file("pluginspark4"))
   .enablePlugins(AssemblyPlugin)
   .settings(
     name := "optima-spark4",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     scalaVersion := scala213,
     crossScalaVersions := List(scala213), // Only Scala 2.13 for Spark 4.x
-    version      := (if (git.gitCurrentTags.value.exists(_.startsWith("v"))) {
-      versionNum
-    } else {
-      versionNum + "-SNAPSHOT"
-    }),
     libraryDependencies += "org.apache.spark" %% "spark-core" % "4.0.1" % "provided",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "4.0.1"  % "provided",
     libraryDependencies += "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.5.0" % "provided",
@@ -149,13 +146,6 @@ lazy val pluginspark4 = (project in file("pluginspark4"))
     
     // Publish the assembled JAR instead of the regular JAR
     Compile / packageBin := assembly.value,
-    // Sonatype Central Portal repository configuration
-    publishTo := {
-      if (isSnapshot.value)
-        Some("snapshots" at "https://central.sonatype.com/repository/maven-snapshots/")
-      else
-        sonatypePublishToBundle.value
-    },
     
     // Include source from plugin directory for self-contained build
     Compile / unmanagedSourceDirectories += (plugin / Compile / sourceDirectory).value / "scala",
@@ -202,14 +192,9 @@ lazy val pluginspark4databricks = (project in file("pluginspark4databricks"))
   .enablePlugins(AssemblyPlugin)
   .settings(
     name := "optima-spark4-databricks",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     scalaVersion := scala213,
     crossScalaVersions := List(scala213), // Only Scala 2.13 for Spark 4.x
-    version      := (if (git.gitCurrentTags.value.exists(_.startsWith("v"))) {
-      versionNum
-    } else {
-      versionNum + "-SNAPSHOT"
-    }),
     libraryDependencies += "org.apache.spark" %% "spark-core" % "4.0.1" % "provided",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "4.0.1"  % "provided",
     libraryDependencies += "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.5.0" % "provided",
@@ -243,19 +228,13 @@ lazy val pluginspark4databricks = (project in file("pluginspark4databricks"))
       case _ => MergeStrategy.first
     },
 
-    Compile / packageBin := assembly.value,
-    publishTo := {
-      if (isSnapshot.value)
-        Some("snapshots" at "https://central.sonatype.com/repository/maven-snapshots/")
-      else
-        sonatypePublishToBundle.value
-    }
+    Compile / packageBin := assembly.value
   )
 
 lazy val example_3_1_3 = (project in file("example_3_1_3"))
   .settings(
     name := "OptimaSparkExample313",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     crossScalaVersions := List(scala212),
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.1.3",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.3",
@@ -265,7 +244,7 @@ lazy val example_3_1_3 = (project in file("example_3_1_3"))
 lazy val example_3_2_4 = (project in file("example_3_2_4"))
   .settings(
     name := "OptimaSparkExample324",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.2.4",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.4",
@@ -275,7 +254,7 @@ lazy val example_3_2_4 = (project in file("example_3_2_4"))
 lazy val example_3_3_3 = (project in file("example_3_3_3"))
   .settings(
     name := "OptimaSparkExample333",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     crossScalaVersions := List(scala212),
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.3.3",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.3.3",
@@ -287,7 +266,7 @@ lazy val example_3_3_3 = (project in file("example_3_3_3"))
 lazy val example_3_4_1 = (project in file("example_3_4_1"))
   .settings(
     name := "OptimaSparkExample341",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.4.1",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.4.1",
@@ -298,7 +277,7 @@ lazy val example_3_4_1 = (project in file("example_3_4_1"))
 lazy val example_3_5_1 = (project in file("example_3_5_1"))
   .settings(
     name := "OptimaSparkExample351",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies += "org.apache.spark" %% "spark-core" % "3.5.7",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.5.7",
@@ -316,7 +295,7 @@ lazy val example_3_5_1 = (project in file("example_3_5_1"))
 lazy val example_3_4_1_remote = (project in file("example_3_4_1_remote"))
   .settings(
       name := "OptimaSparkExample341Remote",
-      organization := "io.telemetria",
+      organization := "ai.telemetria",
     crossScalaVersions := supportedScalaVersions,
       libraryDependencies += "org.apache.spark" %% "spark-core" % "3.4.1",
       libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.4.1",
@@ -327,7 +306,7 @@ lazy val example_3_4_1_remote = (project in file("example_3_4_1_remote"))
 lazy val example_4_0_1 = (project in file("example_4_0_1"))
   .settings(
     name := "OptimaSparkExample401",
-    organization := "io.telemetria",
+    organization := "ai.telemetria",
     scalaVersion := scala213,
     crossScalaVersions := List(scala213), // Only Scala 2.13 for Spark 4.x
     // there is no scala 2.12 version so we need to force 2.13 to make it compile
