@@ -36,7 +36,16 @@ jobs:
       - uses: sbt/setup-sbt@v1
 
       - name: Publish
-        run: sbt ci-release
+        run: |
+          if [[ -z "${SONATYPE_USERNAME}" || -z "${SONATYPE_PASSWORD}" ]]; then
+            if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+              echo "::error::SONATYPE_USERNAME and SONATYPE_PASSWORD are required for tag releases."
+              exit 1
+            fi
+            echo "::notice::Skipping snapshot publish because SONATYPE credentials are not configured."
+            exit 0
+          fi
+          sbt ci-release
         env:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
