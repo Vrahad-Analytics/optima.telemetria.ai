@@ -1,0 +1,8 @@
+{
+  // The sample uses its own venv (Python 3.11 - PySpark 3.5 does not support
+  // the system Python 3.14). Without this, "Run" uses the system interpreter
+  // and fails with ModuleNotFoundError: No module named 'pyspark'.
+  "python.defaultInterpreterPath": "${workspaceFolder}/sample_code/.venv/bin/python",
+  "python.envFile": "${workspaceFolder}/sample_code/.env",
+  "python.terminal.activateEnvironment": true
+}

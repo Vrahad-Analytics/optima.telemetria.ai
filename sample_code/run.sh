@@ -10,9 +10,6 @@ cd "$(dirname "$0")"
 export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}"
 export PATH="$JAVA_HOME/bin:$PATH"
 
-# Spark 3.5 on Java 17 needs these opens or it fails on reflective access.
-export PYSPARK_SUBMIT_ARGS="--driver-java-options '--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED' pyspark-shell"
-
 export SALES_FILES_LOCATION="${SALES_FILES_LOCATION:-$PWD/data/store_sales}"
 
 if [[ "${1:-}" == "--regen" || ! -d "$SALES_FILES_LOCATION" ]]; then

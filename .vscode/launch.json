@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PySpark: Optima example",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/sample_code/pysparkcode.py",
+      "python": "${workspaceFolder}/sample_code/.venv/bin/python",
+      "envFile": "${workspaceFolder}/sample_code/.env",
+      "cwd": "${workspaceFolder}/sample_code",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
