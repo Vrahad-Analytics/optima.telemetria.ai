@@ -26,21 +26,17 @@ import Progress from "../Progress";
 import { Data, EnhancedTableProps, Order } from './TableTypes';
 import { getComparator, stableSort } from "./TableUtils";
 
+// Head/body styling comes from the theme (see theme.ts MuiTableCell) so tables
+// stay consistent across tabs. Numerics get tabular figures so columns align.
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
   [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
+    fontVariantNumeric: "tabular-nums",
   },
 }));
 
+// No zebra striping: hairline row borders plus a hover state read cleaner at
+// density and keep the eye on the values rather than the banding.
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
   "&:last-child td, &:last-child th": {
     border: 0,
   },
@@ -230,13 +226,21 @@ export default function SqlTable({
         width: "100%",
         height: "100%",
         display: "flex",
-        justifyContent: "space-around",
         flexDirection: "column",
-        marginBottom: "15px",
+        gap: "12px",
+        paddingBottom: "12px",
         overflow: "hidden",
       }}
     >
-      <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
+      <Box
+        sx={{
+          width: "80%",
+          mx: "auto",
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+        }}
+      >
         <TextField
           size="small"
           placeholder="Search descriptions..."
@@ -249,7 +253,7 @@ export default function SqlTable({
               </InputAdornment>
             ),
           }}
-          sx={{ minWidth: "250px" }}
+          sx={{ minWidth: "260px" }}
         />
         <Box sx={{ minWidth: "250px" }}>
           <ColumnPicker
@@ -274,9 +278,10 @@ export default function SqlTable({
       <div
         style={{
           width: "100%",
-          height: "100%",
+          flex: 1,
+          minHeight: 0,
           display: "flex",
-          justifyContent: "space-around",
+          justifyContent: "center",
           overflow: "hidden",
         }}
       >

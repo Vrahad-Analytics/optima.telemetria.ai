@@ -19,6 +19,8 @@ import { Stack } from "@mui/system";
 import React, { FC, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../Hooks";
+import EmptyState from "../components/EmptyState/EmptyState";
+import { tokens } from "../theme";
 
 interface GroupedAlerts {
   [alertName: string]: {
@@ -95,18 +97,12 @@ export const AlertsTab: FC<{}> = (): JSX.Element => {
 
   if (alerts?.alerts.length === 0) {
     return (
-      <Box
-        sx={{
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Alert severity="success" icon={<CheckCircleOutlineIcon />}>
-          No alerts 😎
-        </Alert>
-      </Box>
+      <EmptyState
+        icon={CheckCircleOutlineIcon}
+        tone="positive"
+        title="No alerts"
+        description="Optima found nothing worth flagging in this run. Alerts appear here when it detects skew, spill, idle cores, memory pressure or failing tasks."
+      />
     );
   }
 
@@ -119,14 +115,50 @@ export const AlertsTab: FC<{}> = (): JSX.Element => {
         overflow: "hidden",
       }}
     >
-      {/* Summary Header */}
-      <Box sx={{ padding: 2, display: "flex", gap: 2 }}>
-        <Alert severity="error" sx={{ flex: 1 }}>
-          {`Errors - ${totalErrors}`}
-        </Alert>
-        <Alert severity="warning" sx={{ flex: 1 }}>
-          {`Warnings - ${totalWarnings}`}
-        </Alert>
+      {/* Summary header: compact counts. A zero count should not command a
+          full-width coloured banner, so severity is carried by a small dot and
+          the numeral rather than a background wash. */}
+      <Box sx={{ px: 2, pt: 2, pb: 1, display: "flex", gap: 1.5 }}>
+        {[
+          { label: "Errors", value: totalErrors ?? 0, color: tokens.error },
+          { label: "Warnings", value: totalWarnings ?? 0, color: tokens.warning },
+        ].map(({ label, value, color }) => (
+          <Paper
+            key={label}
+            sx={{
+              px: 2,
+              py: 1.25,
+              display: "flex",
+              alignItems: "center",
+              gap: 1.25,
+              minWidth: 148,
+            }}
+          >
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                flexShrink: 0,
+                backgroundColor: value > 0 ? color : tokens.textFaint,
+              }}
+            />
+            <Typography variant="overline" sx={{ lineHeight: 1 }}>
+              {label}
+            </Typography>
+            <Typography
+              sx={{
+                ml: "auto",
+                fontSize: "1.125rem",
+                fontWeight: 600,
+                fontVariantNumeric: "tabular-nums",
+                color: value > 0 ? color : tokens.textMuted,
+              }}
+            >
+              {value}
+            </Typography>
+          </Paper>
+        ))}
       </Box>
 
       {/* Alert Groups Section */}

@@ -27,7 +27,9 @@ export default function ConfigTable({ config }: ConfigTableProps) {
           {config.map((row) => (
             <TableRow key={row.name}>
               <TableCell align="left">{row.name}</TableCell>
-              <TableCell align="left">
+              {/* Config values are literals (local[4], 384m, 1.38 GiB) - monospace
+                  makes them scannable and stops them reading as prose. */}
+              <TableCell align="left" className="tabular">
                 {row.value ?? row.default}
                 {row.value === undefined || row.value === row.default
                   ? " (default)"

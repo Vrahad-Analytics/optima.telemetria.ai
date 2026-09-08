@@ -7,6 +7,7 @@ import DisconnectedModal from "./components/Modals/DisconnectedModal";
 import Progress from "./components/Progress";
 import { useAppDispatch, useAppSelector } from "./Hooks";
 import SparkAPI from "./services/SparkApi";
+import { tokens } from "./theme";
 import { getTabByUrl, Tab, TabToUrl } from "./services/TabsService";
 import {
   BASE_CURRENT_PAGE,
@@ -65,10 +66,7 @@ export default function App() {
       <Box
         component="main"
         sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light"
-              ? theme.palette.grey[100]
-              : theme.palette.grey[900],
+          backgroundColor: tokens.bg,
           flexGrow: 1,
           height: "100vh",
           overflow: "hidden",

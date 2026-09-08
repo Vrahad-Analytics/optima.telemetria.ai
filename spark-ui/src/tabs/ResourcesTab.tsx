@@ -6,7 +6,9 @@ import {
   FormGroup,
   Switch,
 } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import React, { FC } from "react";
+import EmptyState from "../components/EmptyState/EmptyState";
 import ConfigTable from "../components/ConfigTable";
 import ResourceBar from "../components/ResourceBar";
 import ResourceGraph, {
@@ -22,16 +24,12 @@ export const ResourcesTab: FC<{}> = (): JSX.Element => {
 
   if (resourceControlType === "local") {
     return (
-      <div
-        style={{
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Alert severity="success">Local mode, no resource managment 😎</Alert>
-      </div>
+      <EmptyState
+        icon={CheckCircleOutlineIcon}
+        tone="positive"
+        title="Running in local mode"
+        description="There is no cluster resource management to report on. Executor allocation and utilisation appear here when running against a cluster."
+      />
     );
   }
 

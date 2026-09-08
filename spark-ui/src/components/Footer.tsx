@@ -5,7 +5,7 @@ import * as React from "react";
 
 export default function Footer() {
     const onGitHubClick = (): void => {
-        window.open("https://github.com/Vrahad-Analytics/optima", "_blank");
+        window.open("https://github.com/Vrahad-Analytics/optima.telemetria.ai", "_blank");
     };
 
     return (

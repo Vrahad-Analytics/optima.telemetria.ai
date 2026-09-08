@@ -1,6 +1,7 @@
 import ErrorIcon from "@mui/icons-material/Error";
 import WarningIcon from "@mui/icons-material/Warning";
 import { Alert, AlertTitle, styled } from "@mui/material";
+import { tokens } from "../../theme";
 import Tooltip, { tooltipClasses, TooltipProps } from "@mui/material/Tooltip";
 import * as React from "react";
 import { Alert as OptimaAlert } from "../../interfaces/AppStore";
@@ -60,22 +61,22 @@ export default function AlertBadge({ alert, margin, placement }: InfoBoxProps) {
       {alert.type === "warning" ? (
         <WarningIcon
           sx={{
-            color: "#ff9100",
+            fontSize: 17,
+            color: tokens.warning,
             position: "absolute",
-            top: "0%",
-            right: "0%",
-            transform: "translate(50%, -50%)",
+            top: 6,
+            right: 6,
             margin: margin ?? "0px",
           }}
         ></WarningIcon>
       ) : (
         <ErrorIcon
           sx={{
-            color: "#bf360c",
+            fontSize: 17,
+            color: tokens.error,
             position: "absolute",
-            top: "0%",
-            right: "0%",
-            transform: "translate(50%, -50%)",
+            top: 6,
+            right: 6,
             margin: margin ?? "0px",
           }}
         ></ErrorIcon>
