@@ -112,7 +112,7 @@ spark-submit
 
 * There is also support for scala 2.13, if your spark cluster is using scala 2.13 change package name to ai.telemetria:optima-spark_**2.13**:0.1.1
 * For observability on completed runs, install Optima in the **Spark History Server**: set `spark.history.provider=org.apache.spark.deploy.history.FsOptimaHistoryProvider` and add the Optima JAR to the history server classpath (see the `docker/` directory for a ready-made history server image).
-* On **Databricks** Runtime 17.3+, which ships `javax.servlet` instead of `jakarta.servlet`, use the dedicated shaded artifact `ai.telemetria:optima-spark4-databricks_2.13` (same plugin class — only the jar coordinate differs).
+* On **Databricks**, Optima must be installed with a cluster init script rather than as a Maven library — `spark.plugins` is read before Databricks installs cluster libraries. See [documentation/DATABRICKS.md](documentation/DATABRICKS.md) for the script, the per-runtime artifact (DBR 17.3+ needs the shaded `optima-spark4-databricks_2.13` build) and troubleshooting.
 
 ## Configuration
 
