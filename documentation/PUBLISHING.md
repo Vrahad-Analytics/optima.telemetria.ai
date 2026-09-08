@@ -144,6 +144,38 @@ gpg --keyserver keyserver.ubuntu.com --send-keys <LONG_KEY_ID>
 
 ## Publishing from your laptop
 
+### Build the web UI first - always
+
+The plugin embeds a React UI as jar resources. Those assets are **generated build
+output and are gitignored**, so a fresh checkout does not have them. A jar built
+without them publishes perfectly cleanly and then fails for every consumer at
+`SparkContext` init:
+
+```
+java.lang.Exception: Could not find resource path for Web UI: io/telemetria/optima/static/ui
+```
+
+This is exactly how `0.1.0` shipped broken, and Maven Central releases are immutable.
+
+```bash
+cd spark-ui
+npm ci
+npm run deploy      # writes into spark-plugin/plugin/src/main/resources/...
+cd ../spark-plugin
+```
+
+The build refuses to publish without them - `checkUiAssets` is wired into `publish`,
+`publishLocal` and `publishSigned` - but build the UI deliberately rather than relying
+on the guard to catch you. CI does this automatically in `.github/workflows/release.yml`.
+
+Sanity-check any jar before releasing it:
+
+```bash
+unzip -l <jar> | grep -c io/telemetria/optima/static/ui   # must be 8, not 0
+```
+
+### Then publish
+
 All commands run from the `spark-plugin/` directory.
 
 **Always do a snapshot first.** Snapshots are not permanent and let you verify the
@@ -165,9 +197,13 @@ The git tag is the single source of truth for the released version: tagging `v0.
 publishes `0.2.0`. You do not edit a version number in `build.sbt`.
 
 ```bash
+# 0. Wipe stale staging - it is NOT cleaned between releases and a leftover
+#    older version would be bundled into your upload
+rm -rf target/sona-staging
+
 # 1. Tag the commit you want to release
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 
 # 3. Build, sign, and stage all cross-built artifacts
 cd spark-plugin
