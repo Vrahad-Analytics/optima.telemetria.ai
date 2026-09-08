@@ -1,10 +1,46 @@
 import sbtassembly.AssemblyPlugin.autoImport._
 
 // Base version for SNAPSHOT builds only; releases take their version from the git tag.
-lazy val versionNum: String = "0.1.0"
+lazy val versionNum: String = "0.1.1"
 lazy val scala212 = "2.12.20"
 lazy val scala213 = "2.13.16"
 lazy val supportedScalaVersions = List(scala212, scala213)
+
+// --- Web UI asset guard -----------------------------------------------------
+// The Optima web UI is built by `npm run deploy` in ../spark-ui, which writes into
+// plugin/src/main/resources/io/telemetria/optima/static/ui. If those assets are
+// absent the jar still compiles and publishes cleanly, but every consumer hits
+//     java.lang.Exception: Could not find resource path for Web UI:
+//         io/telemetria/optima/static/ui
+// at SparkContext init - the plugin cannot start at all. Version 0.1.0 was
+// published this way. Fail loudly at publish time instead.
+lazy val uiAssetsDir = settingKey[File]("Directory holding the compiled Optima web UI assets")
+lazy val checkUiAssets = taskKey[Unit]("Fail the build if the Optima web UI assets are missing")
+
+ThisBuild / uiAssetsDir :=
+  (ThisBuild / baseDirectory).value / "plugin" / "src" / "main" / "resources" /
+    "io" / "telemetria" / "optima" / "static" / "ui"
+
+ThisBuild / checkUiAssets := {
+  val index = (ThisBuild / uiAssetsDir).value / "index.html"
+  if (!index.isFile) sys.error(
+    s"""Optima web UI assets are missing - refusing to publish.
+       |  expected: ${index.getAbsolutePath}
+       |  build them first:
+       |      cd spark-ui && npm install && npm run deploy
+       |Publishing without them yields a jar that throws
+       |"Could not find resource path for Web UI" at SparkContext init.""".stripMargin)
+}
+
+// Applied to every module that ships the embedded UI.
+lazy val uiAssetGuard = Seq(
+  publish      := (publish      dependsOn (ThisBuild / checkUiAssets)).value,
+  publishLocal := (publishLocal dependsOn (ThisBuild / checkUiAssets)).value,
+  // publishSigned lives in sbt-pgp and is not auto-imported into .sbt files.
+  com.jsuereth.sbtpgp.PgpKeys.publishSigned :=
+    (com.jsuereth.sbtpgp.PgpKeys.publishSigned dependsOn (ThisBuild / checkUiAssets)).value
+)
+// ----------------------------------------------------------------------------
 
 // Version and publish target are build-wide. publishTo MUST be at ThisBuild scope:
 // `localStaging` resolves per-scope, and the Central Portal expects every module of
@@ -50,6 +86,7 @@ lazy val optima = project
   )
 
 lazy val plugin = (project in file("plugin"))
+  .settings(uiAssetGuard)
   .settings(
     name := "optima-spark-common",
     organization := "ai.telemetria",
@@ -64,6 +101,7 @@ lazy val plugin = (project in file("plugin"))
 
 lazy val pluginspark3 = (project in file("pluginspark3"))
   .enablePlugins(AssemblyPlugin)
+  .settings(uiAssetGuard)
   .settings(
     name := "optima-spark",
     organization := "ai.telemetria",
@@ -122,6 +160,7 @@ lazy val pluginspark3 = (project in file("pluginspark3"))
 
 lazy val pluginspark4 = (project in file("pluginspark4"))
   .enablePlugins(AssemblyPlugin)
+  .settings(uiAssetGuard)
   .settings(
     name := "optima-spark4",
     organization := "ai.telemetria",
@@ -190,6 +229,7 @@ lazy val pluginspark4 = (project in file("pluginspark4"))
 
 lazy val pluginspark4databricks = (project in file("pluginspark4databricks"))
   .enablePlugins(AssemblyPlugin)
+  .settings(uiAssetGuard)
   .settings(
     name := "optima-spark4-databricks",
     organization := "ai.telemetria",

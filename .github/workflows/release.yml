@@ -35,6 +35,23 @@ jobs:
 
       - uses: sbt/setup-sbt@v1
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: spark-ui/package-lock.json
+
+      # The web UI is generated build output (gitignored) and is embedded into the
+      # plugin jar as resources. Without this step the published jar throws
+      # "Could not find resource path for Web UI" at SparkContext init - this is
+      # exactly how 0.1.0 shipped broken. The sbt `checkUiAssets` guard also fails
+      # the build if this is skipped.
+      - name: Build the Optima web UI
+        working-directory: spark-ui
+        run: |
+          npm ci
+          npm run deploy
+
       - name: Publish
         run: |
           if [[ -z "${SONATYPE_USERNAME}" || -z "${SONATYPE_PASSWORD}" ]]; then

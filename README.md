@@ -40,7 +40,9 @@ After installation, you will see an "Optima" tab in the Spark Web UI. Click on i
 
 ## Installation
 
-> **Note**: The `ai.telemetria` artifacts are not yet published to Maven Central. Until the first release is published, build the JARs locally (see [Building from source](#building-from-source)).
+> ⚠️ **Do not use `0.1.0`.** It was published without the embedded web UI assets and fails at
+> startup with `java.lang.Exception: Could not find resource path for Web UI: io/telemetria/optima/static/ui`.
+> Maven Central releases are immutable, so it cannot be withdrawn. Use `0.1.1` or later.
 
 ### Scala
 
@@ -48,12 +50,12 @@ Install Optima via sbt:
 
 For Spark 3.X:
 ```sbt
-libraryDependencies += "ai.telemetria" %% "optima-spark" % "0.1.0"
+libraryDependencies += "ai.telemetria" %% "optima-spark" % "0.1.1"
 ```
 
 For Spark 4.X:
 ```sbt
-libraryDependencies += "ai.telemetria" %% "optima-spark4" % "0.1.0"
+libraryDependencies += "ai.telemetria" %% "optima-spark4" % "0.1.1"
 ```
 
 Then instruct spark to load the Optima plugin:
@@ -73,7 +75,7 @@ For Spark 3.X:
 ```python
 builder = pyspark.sql.SparkSession.builder
     ...
-    .config("spark.jars.packages", "ai.telemetria:optima-spark_2.12:0.1.0") \
+    .config("spark.jars.packages", "ai.telemetria:optima-spark_2.12:0.1.1") \
     .config("spark.plugins", "io.telemetria.optima.SparkOptimaPlugin") \
     ...
 ```
@@ -82,7 +84,7 @@ For Spark 4.X:
 ```python
 builder = pyspark.sql.SparkSession.builder
     ...
-    .config("spark.jars.packages", "ai.telemetria:optima-spark4_2.13:0.1.0") \
+    .config("spark.jars.packages", "ai.telemetria:optima-spark4_2.13:0.1.1") \
     .config("spark.plugins", "io.telemetria.optima.SparkOptimaPlugin") \
     ...
 ```
@@ -93,7 +95,7 @@ Alternatively, install Optima with **no code change** as a spark ivy package by 
 
 ```bash
 spark-submit
---packages ai.telemetria:optima-spark_2.12:0.1.0 \
+--packages ai.telemetria:optima-spark_2.12:0.1.1 \
 --conf spark.plugins=io.telemetria.optima.SparkOptimaPlugin \
 ...
 ```
@@ -101,14 +103,14 @@ spark-submit
 For Spark 4.X:
 ```bash
 spark-submit
---packages ai.telemetria:optima-spark4_2.13:0.1.0 \
+--packages ai.telemetria:optima-spark4_2.13:0.1.1 \
 --conf spark.plugins=io.telemetria.optima.SparkOptimaPlugin \
 ...
 ```
 
 ### Additional installation options
 
-* There is also support for scala 2.13, if your spark cluster is using scala 2.13 change package name to ai.telemetria:optima-spark_**2.13**:0.1.0
+* There is also support for scala 2.13, if your spark cluster is using scala 2.13 change package name to ai.telemetria:optima-spark_**2.13**:0.1.1
 * For observability on completed runs, install Optima in the **Spark History Server**: set `spark.history.provider=org.apache.spark.deploy.history.FsOptimaHistoryProvider` and add the Optima JAR to the history server classpath (see the `docker/` directory for a ready-made history server image).
 * On **Databricks** Runtime 17.3+, which ships `javax.servlet` instead of `jakarta.servlet`, use the dedicated shaded artifact `ai.telemetria:optima-spark4-databricks_2.13` (same plugin class — only the jar coordinate differs).
 

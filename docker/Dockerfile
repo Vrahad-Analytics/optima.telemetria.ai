@@ -3,7 +3,7 @@
 # Build arguments:
 #   SPARK_VERSION - Spark version to use (default: 3.5.1)
 #   SCALA_VERSION - Scala binary version: 2.12 or 2.13 (default: 2.12)
-#   OPTIMA_VERSION - Optima plugin version (default: 0.1.0)
+#   OPTIMA_VERSION - Optima plugin version (default: 0.1.1)
 #   USE_LOCAL_JAR - Use locally built JAR instead of Maven (default: true until ai.telemetria artifacts are published)
 #
 # Runtime:
@@ -26,7 +26,7 @@ FROM apache/spark:${SPARK_VERSION}
 # Re-declare ARGs after FROM to make them available
 ARG SPARK_VERSION=3.5.1
 ARG SCALA_VERSION=2.12
-ARG OPTIMA_VERSION=0.1.0
+ARG OPTIMA_VERSION=0.1.1
 ARG USE_LOCAL_JAR=true
 ARG ICEBERG_VERSION=1.7.1
 ARG BIGQUERY_VERSION=0.42.0
