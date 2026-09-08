@@ -1,0 +1,4 @@
+# PySpark 3.5.x pairs with the Scala 2.12 build of the plugin
+# (ai.telemetria:optima-spark_2.12). For Spark 4.x use pyspark==4.x together
+# with ai.telemetria:optima-spark4_2.13 instead.
+pyspark==3.5.1
